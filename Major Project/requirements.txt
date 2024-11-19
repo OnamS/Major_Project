@@ -1,0 +1,18 @@
+fastapi[all]
+fastapi-utilities
+
+
+usme bhi endpoints hai upload ke
+/api/v1/slave/chunk
+usme /uplaod
+/upload
+vo sabka code hai ytcdn wale me
+java me hai par vo
+
+https://github.com/shesha4572/video-streaming-frontend/blob/master/src/components/Uploader/Uploader.js
+M Reddy
+2:46 PM
+https://github.com/shesha4572/ytcdn/blob/master/src/main/java/com/shesha4572/ytcdn/services/UploadService.java
+M Reddy
+2:49 PM
+https://github.com/shesha4572/cdn-master/blob/master/src/main/java/com/shesha4572/cdnmaster/services/FileService.java
