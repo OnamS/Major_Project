@@ -16,6 +16,7 @@ app = FastAPI()
 scheduler_url = "https://transcode.pvehome.me/api/v1/worker/ping"
 pod_name = "worker-pod-1"
 is_assigned_task = False
+assigned_task_id = ""
 
 
 from fastapi import FastAPI, Request
@@ -176,7 +177,7 @@ def run_command_and_store_output(output_file,startTime,endTime, VideoInternalFil
             file.write(f"Unexpected Error: {str(e)}\n")
     
     upload_chunk(file,VideoInternalFileID, Index, podNames)
-        return {
+    return {
             "stdout": "",
             "stderr": str(e),
             "returncode": -1
@@ -185,31 +186,31 @@ def run_command_and_store_output(output_file,startTime,endTime, VideoInternalFil
 
 
 # Set up logging
-logging.basicConfig(level=logging.INFO)
-log = logging.getLogger(__name__)
+# logging.basicConfig(level=logging.INFO)
+# log = logging.getLogger(__name__)
 
-class Chunk:
-    """
-    A class to represent a file chunk.
-    """
-    def __init__(self, chunk_id, chunk_index, file_id):
-        self.chunk_id = chunk_id
-        self.chunk_index = chunk_index
-        self.file_id = file_id
+# class Chunk:
+#     """
+#     A class to represent a file chunk.
+#     """
+#     def __init__(self, chunk_id, chunk_index, file_id):
+#         self.chunk_id = chunk_id
+#         self.chunk_index = chunk_index
+#         self.file_id = file_id
 
-    def __repr__(self):
-        return f"Chunk(chunk_id='{self.chunk_id}', chunk_index={self.chunk_index}, file_id='{self.file_id}')"
+#     def __repr__(self):
+#         return f"Chunk(chunk_id='{self.chunk_id}', chunk_index={self.chunk_index}, file_id='{self.file_id}')"
 
-class RedisRepository:
+# class RedisRepository:
 
-    def __init__(self):
-        self.storage = []
+#     def __init__(self):
+#         self.storage = []
 
-    def save(self, obj):
-        self.storage.append(obj)
+#     def save(self, obj):
+#         self.storage.append(obj)
 
-    def count(self):
-        return len(self.storage)
+#     def count(self):
+#         return len(self.storage)
 
 # class ChunkService:
 #     """
@@ -219,61 +220,61 @@ class RedisRepository:
 #         return [f"slave_pod_{i}" for i in range(3)]  # Example: 3 slave pods available
 
 
-class File:
-    """
-    A class to represent a file with chunks.
-    """
-    def __init__(self, file_id, size):
-        self.file_id = file_id
-        self.size = size
-        self.chunk_list = []
+# class File:
+#     """
+#     A class to represent a file with chunks.
+#     """
+#     def __init__(self, file_id, size):
+#         self.file_id = file_id
+#         self.size = size
+#         self.chunk_list = []
 
-    def set_chunk_list(self, chunk_list):
-        self.chunk_list = chunk_list
+#     def set_chunk_list(self, chunk_list):
+#         self.chunk_list = chunk_list
 
-    def get_size(self):
-        return self.size
+#     def get_size(self):
+#         return self.size
 
-    def get_file_id(self):
-        return self.file_id
+#     def get_file_id(self):
+#         return self.file_id
 
 
-def allocate_chunks(file, slave_pod_redis_repository, chunk_service, file_redis_repository):
-    CHUNK_SIZE = 64* 1000* 1000
-    replication_factor = 3
+# def allocate_chunks(file, slave_pod_redis_repository, chunk_service, file_redis_repository):
+#     CHUNK_SIZE = 64* 1000* 1000
+#     replication_factor = 3
 
-    # Calculate number of chunks
-    no_of_chunks = file.get_size() // CHUNK_SIZE
-    last_chunk_size = file.get_size() % CHUNK_SIZE
+#     # Calculate number of chunks
+#     no_of_chunks = file.get_size() // CHUNK_SIZE
+#     last_chunk_size = file.get_size() % CHUNK_SIZE
 
-    if last_chunk_size > 0:
-        no_of_chunks += 1
+#     if last_chunk_size > 0:
+#         no_of_chunks += 1
         
-    # Check if sufficient slave nodes are available
-    if slave_pod_redis_repository.count() < replication_factor:
-        log.warning("File allocation deferred due to insufficient slave node count")
-        return None
+#     # Check if sufficient slave nodes are available
+#     if slave_pod_redis_repository.count() < replication_factor:
+#         log.warning("File allocation deferred due to insufficient slave node count")
+#         return None
 
-    chunk_allocations = []
-    chunk_array_list = []
+#     chunk_allocations = []
+#     chunk_array_list = []
 
-    for i in range(no_of_chunks):
-        chunk_id = ''.join(random.choices(string.ascii_letters + string.digits, k=16))
-        chunk = Chunk(chunk_id=chunk_id, chunk_index=i, file_id=file.get_file_id())
+#     for i in range(no_of_chunks):
+#         chunk_id = ''.join(random.choices(string.ascii_letters + string.digits, k=16))
+#         chunk = Chunk(chunk_id=chunk_id, chunk_index=i, file_id=file.get_file_id())
 
-        chosen_pods = chunk_service.pick_slave_node()
-        chosen_pods.append(chunk.chunk_id)  # Append chunk ID to the chosen pods
-        chunk_allocations.append(chosen_pods)
+#         chosen_pods = chunk_service.pick_slave_node()
+#         chosen_pods.append(chunk.chunk_id)  # Append chunk ID to the chosen pods
+#         chunk_allocations.append(chosen_pods)
 
-        chunk_array_list.append(chunk)
-        slave_pod_redis_repository.save(chunk)
+#         chunk_array_list.append(chunk)
+#         slave_pod_redis_repository.save(chunk)
 
-        log.info(f"Chunk #{chunk.chunk_index} {chunk.chunk_id} assigned to slaves {chosen_pods[1:]}")
+#         log.info(f"Chunk #{chunk.chunk_index} {chunk.chunk_id} assigned to slaves {chosen_pods[1:]}")
     
-    file.set_chunk_list(chunk_array_list)
-    file_redis_repository.save(file)
+#     file.set_chunk_list(chunk_array_list)
+#     file_redis_repository.save(file)
 
-    return chunk_allocations
+#     return chunk_allocations
 
 
 # Example usage
