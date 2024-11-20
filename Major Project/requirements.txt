@@ -1,5 +1,6 @@
 fastapi[all]
 fastapi-utilities
+requests
 
 
 usme bhi endpoints hai upload ke
